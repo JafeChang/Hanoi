@@ -25,6 +25,7 @@ public class HanoiPanel extends JPanel {
 	private long startTime = 0l;
 	private HanoiWindow hanoiWindow;
 	private static int hanoiNumber = 3;
+	private boolean paused=false;
 
 	/**
 	 * Create a new panel which contains the Hanoi blocks.
@@ -204,6 +205,14 @@ public class HanoiPanel extends JPanel {
 		return (int) score;
 	}
 
+	public boolean isPaused() {
+		return paused;
+	}
+
+	public void setPaused(boolean paused) {
+		this.paused = paused;
+	}
+
 	class Timer implements Runnable {
 		@Override
 		public void run() {
@@ -216,6 +225,15 @@ public class HanoiPanel extends JPanel {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
+				}
+				if(paused){
+					while(paused){
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
 				}
 			}
 		}
