@@ -97,6 +97,9 @@ public class HanoiWindow extends JFrame {
 	// public void restart(int hanoiNumber) {
 	//
 	// }
+	public void pause(){
+		panel.setPaused(!panel.isPaused());
+	}
 	public void success() {
 		int opt = JOptionPane
 				.showOptionDialog(
@@ -158,12 +161,13 @@ public class HanoiWindow extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == preferenceM) {
 //				tt.wait();
+				pause();
 				new preferenceFrame(getHanoiWindow());
 			} else if (e.getSource() == newGameM) {
 				panel.restart(HanoiPanel.getHanoiNumber());
 				panel.repaint();
 			} else if (e.getSource() == test) {// TODO
-				success();
+				panel.setPaused(!panel.isPaused());
 			}
 		}
 
@@ -250,14 +254,17 @@ class preferenceFrame extends JFrame {
 					if (opt == 0) {
 						hanoiWindow.panel.restart(hanoiNumber);
 						dispose();
+//						hanoiWindow.pause();
 					}
 				} else {
 					dispose();
+					hanoiWindow.pause();
 				}
 
 			}
 			if (e.getSource() == cancelB) {
 				dispose();
+				hanoiWindow.pause();
 			}
 		}
 

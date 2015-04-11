@@ -96,6 +96,7 @@ public class HanoiPanel extends JPanel {
 
 	public void restart(int hanoiNumber) {
 		init(hanoiNumber);
+		paused=false;
 		arrowPosition = 0;
 	}
 
@@ -214,12 +215,18 @@ public class HanoiPanel extends JPanel {
 	}
 
 	class Timer implements Runnable {
+		long pausedTime=0l;
+		public void restart(){
+			pausedTime=0l;
+		}
+		
 		@Override
 		public void run() {
 			long currentTime;
+			
 			while (true) {
 				currentTime = System.currentTimeMillis();
-				seconds = (currentTime - startTime) / 1000l;
+				seconds = (currentTime - startTime-pausedTime) / 1000l;
 				repaint();
 				try {
 					Thread.sleep(100);
@@ -227,6 +234,8 @@ public class HanoiPanel extends JPanel {
 					e.printStackTrace();
 				}
 				if(paused){
+					System.out.println("pause!");//TODO
+					long pauseStart=System.currentTimeMillis();
 					while(paused){
 						try {
 							Thread.sleep(100);
@@ -234,6 +243,7 @@ public class HanoiPanel extends JPanel {
 							e.printStackTrace();
 						}
 					}
+					pausedTime += System.currentTimeMillis()-pauseStart;
 				}
 			}
 		}
