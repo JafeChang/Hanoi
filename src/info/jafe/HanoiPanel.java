@@ -1,6 +1,7 @@
 package info.jafe;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 
 import javax.swing.JPanel;
@@ -18,6 +19,11 @@ public class HanoiPanel extends JPanel {
 	public static final int ARROWLENGTH = 30;
 	public static final int ARROWUP = 0;
 	public static final int ARROWGAP = 5;
+	
+	public static final int RESUME_GAME = 0;
+	public static final int RESTART_GAME = 1;
+	
+	
 	private BlockHeap[] blockHeap = new BlockHeap[6];
 	private Block[] block = new Block[9];
 	private int arrowPosition = 0;
@@ -25,8 +31,11 @@ public class HanoiPanel extends JPanel {
 	private long startTime = 0l;
 	private HanoiWindow hanoiWindow;
 	private static int hanoiNumber = 3;
-	private boolean paused=false;
-
+	private boolean paused = false;
+	private Timer timer = new Timer();
+	private Thread timerThread = new Thread(timer);
+	private boolean succeeded = false;
+	
 	/**
 	 * Create a new panel which contains the Hanoi blocks.
 	 * 
@@ -37,7 +46,7 @@ public class HanoiPanel extends JPanel {
 	 */
 	HanoiPanel(int hanoiNumber, HanoiWindow hanoiWindow) {
 		init(hanoiNumber);
-
+		timerThread.start();
 		this.hanoiWindow = hanoiWindow;
 
 	}
@@ -59,9 +68,7 @@ public class HanoiPanel extends JPanel {
 		}
 		seconds = 0;
 		startTime = System.currentTimeMillis();
-		Timer timer = new Timer();
-		Thread timerThread = new Thread(timer);
-		timerThread.start();
+
 	}
 
 	public void paint(Graphics g) {
@@ -70,13 +77,15 @@ public class HanoiPanel extends JPanel {
 		g.setColor(Color.BLACK);
 		repeatPaint(g);
 		g.setColor(c);
-		drawArrow(g, arrowPosition);
-		drawBlock(g);
+		this.drawArrow(g, arrowPosition);
+		this.drawBlock(g);
 		g.drawString("Score: " + getScore(), 10, this.getHeight() - 20);
 		g.drawString("Time: " + seconds, this.getWidth() / 2 - 20,
 				this.getHeight() - 20);
 		g.drawString("Steps: " + Block.getSteps(), this.getWidth() - 100,
 				this.getHeight() - 20);
+		this.drawPause(g);
+		this.drawSuccess(g);
 	}
 
 	void repeatPaint(Graphics g) {
@@ -95,8 +104,9 @@ public class HanoiPanel extends JPanel {
 	}
 
 	public void restart(int hanoiNumber) {
+		this.succeeded = false;
+		resume(RESTART_GAME);
 		init(hanoiNumber);
-		paused=false;
 		arrowPosition = 0;
 	}
 
@@ -151,6 +161,27 @@ public class HanoiPanel extends JPanel {
 		}
 	}
 
+	private void drawPause(Graphics g) {
+		if (paused) {
+			Color c = g.getColor();
+			g.setColor(new Color(128, 128, 128, 128));
+			g.fillRect(0, 0, this.getWidth(), this.getHeight());
+			g.setColor(Color.WHITE);
+			g.setFont(new Font("Modern No. 20",Font.PLAIN,36));
+			g.drawString("PAUSE", this.getWidth()/2-54, RECTUP-12);
+			g.drawRect(this.getWidth()/2-60, RECTUP-48, 130, 48);
+			g.setColor(c);
+		}
+	}
+	private void drawSuccess(Graphics g){
+		if(succeeded){
+			Color c = g.getColor();
+			g.setColor(Color.WHITE);
+			g.setFont(new Font("Modern No. 20",Font.PLAIN,36));
+			g.drawString("You are succeeded!", this.getWidth()/2-145, RECTUP);
+			g.setColor(c);
+		}
+	}
 	public void up() {
 		int i = arrowPosition;
 		if (blockHeap[i].isEmpty()) {
@@ -172,6 +203,8 @@ public class HanoiPanel extends JPanel {
 			}
 		}
 		if (blockHeap[5].isFull()) {
+			this.repaint();
+			this.succeeded = true;
 			hanoiWindow.success();
 		}
 	}
@@ -210,40 +243,55 @@ public class HanoiPanel extends JPanel {
 		return paused;
 	}
 
-	public void setPaused(boolean paused) {
-		this.paused = paused;
+	public void setPaused() {
+		this.paused = true;
 	}
 
-	class Timer implements Runnable {
-		long pausedTime=0l;
-		public void restart(){
-			pausedTime=0l;
+	public void resume(int backNo){
+		if(backNo==RESUME_GAME){
+			paused=false;
+		}else if (backNo==RESTART_GAME) {
+			paused=false;
+			timer.hasRestart=true;
+//			timer.timerRestart();
+//			startTime = System.currentTimeMillis();
 		}
-		
+	}
+	class Timer implements Runnable {
+		long pausedTime = 0l;
+		boolean hasRestart = false;
+
+		public void timerRestart() {
+			pausedTime = 0l;
+			hasRestart = false;
+		}
+
 		@Override
 		public void run() {
 			long currentTime;
-			
+
 			while (true) {
 				currentTime = System.currentTimeMillis();
-				seconds = (currentTime - startTime-pausedTime) / 1000l;
+				if(hasRestart){
+					timerRestart();
+				}
+				seconds = (currentTime - startTime - pausedTime) / 1000l;
 				repaint();
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				if(paused){
-					System.out.println("pause!");//TODO
-					long pauseStart=System.currentTimeMillis();
-					while(paused){
+				if (paused) {
+					long pauseStart = System.currentTimeMillis();
+					while (paused) {
 						try {
 							Thread.sleep(100);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
 					}
-					pausedTime += System.currentTimeMillis()-pauseStart;
+					pausedTime += System.currentTimeMillis() - pauseStart;
 				}
 			}
 		}
