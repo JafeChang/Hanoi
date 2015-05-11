@@ -36,8 +36,8 @@ public class HanoiWindow extends JFrame {
 	JMenu gameMenu = new JMenu("Game");
 	JMenu helpMenu = new JMenu("Help");
 	JMenuItem aboutM = new JMenuItem("about Hanoi", KeyEvent.VK_A);// TODO
-	JMenuItem preferenceM = new JMenuItem("Preference", KeyEvent.VK_P);// TODO
-	JMenuItem exitM = new JMenuItem("Exit Hanoi", KeyEvent.VK_E);// TODO
+	JMenuItem preferenceM = new JMenuItem("Preference", KeyEvent.VK_P);
+	JMenuItem exitM = new JMenuItem("Exit Hanoi", KeyEvent.VK_E);
 	JMenuItem newGameM = new JMenuItem("New Game", KeyEvent.VK_N);
 	JMenuItem loadGameM = new JMenuItem("Load Game", KeyEvent.VK_L);// TODO
 	JMenuItem saveGameM = new JMenuItem("Save Game", KeyEvent.VK_S);// TODO
@@ -52,12 +52,6 @@ public class HanoiWindow extends JFrame {
 				(int) (0.5 * screenSize.y - 300), 800, 600);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		// restartB=new JButton("restart");
-		// restartB.addActionListener(new BMonitor());
-		// restartB.addKeyListener(new HMonitor());
-		// this.add(restartB,"South");
-
-		// panel=null;
 		repaint();
 		panel = new HanoiPanel(HanoiPanel.getHanoiNumber(), this);
 		panel.setBackground(Color.WHITE);
@@ -67,6 +61,7 @@ public class HanoiWindow extends JFrame {
 		MenuMonitor mMonitor = new MenuMonitor();
 
 		preferenceM.addActionListener(mMonitor);
+		exitM.addActionListener(mMonitor);
 		hanoiMenu.add(aboutM);
 		hanoiMenu.addSeparator();
 		hanoiMenu.add(preferenceM);
@@ -96,9 +91,6 @@ public class HanoiWindow extends JFrame {
 
 	}
 
-	// public void restart(int hanoiNumber) {
-	//
-	// }
 	public void pause() {
 		panel.setPaused();
 	}
@@ -153,20 +145,6 @@ public class HanoiWindow extends JFrame {
 		}
 	}
 
-	// class BMonitor implements ActionListener {
-	// @Override
-	// public void actionPerformed(ActionEvent e) {
-	// if (e.getSource() == restartB) {
-	// // System.out.println("!");
-	// // restart(9);
-	// // requestFocusInWindow();
-	// panel.restart();
-	// panel.repaint();
-	// }
-	// }
-	//
-	// }
-
 	class MenuMonitor implements ActionListener {
 
 		@Override
@@ -175,14 +153,15 @@ public class HanoiWindow extends JFrame {
 				// tt.wait();
 				pause();
 				new preferenceFrame(getHanoiWindow());
+			} else if (e.getSource() == exitM) {
+				System.exit(0);
 			} else if (e.getSource() == newGameM) {
 				panel.restart(HanoiPanel.getHanoiNumber());
 				panel.repaint();
 			} else if (e.getSource() == test) {// TODO
-			// panel.setPaused(!panel.isPaused());
+				// panel.setPaused(!panel.isPaused());
 			}
 		}
-
 	}
 
 }
